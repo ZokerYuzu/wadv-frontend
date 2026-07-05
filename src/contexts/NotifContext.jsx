@@ -1,52 +1,34 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-} from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 
 const NotifContext = createContext(null);
 
 export function NotifProvider({ children }) {
-  const [toasts, setToasts] = useState([]);
+    const [toasts, setToasts] = useState([]);
 
-  const addToast = useCallback((toast) => {
-    const id = Date.now();
+    const addToast = useCallback((toast) => {
+        const id = Date.now();
+        setToasts(prev => [...prev, { id, ...toast }]);
 
-    setToasts((prev) => [
-      ...prev,
-      {
-        id,
-        ...toast,
-      },
-    ]);
+        setTimeout(() => {
+            setToasts(prev => prev.filter(t => t.id !== id));
+        }, 4000);
+    }, []);
 
-    setTimeout(() => {
-      setToasts((prev) =>
-        prev.filter((t) => t.id !== id)
-      );
-    }, 4000);
-  }, []);
+    const removeToast = useCallback((id) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+    }, []);
 
-  const removeToast = useCallback((id) => {
-    setToasts((prev) =>
-      prev.filter((t) => t.id !== id)
+    return (
+        <NotifContext.Provider value={{ toasts, addToast, removeToast }}>
+            {children}
+        </NotifContext.Provider>
     );
-  }, []);
-
-  return (
-    <NotifContext.Provider
-      value={{
-        toasts,
-        addToast,
-        removeToast,
-      }}
-    >
-      {children}
-    </NotifContext.Provider>
-  );
 }
 
 export function useNotif() {
-  return useContext(NotifContext);
+    const ctx = useContext(NotifContext);
+    if (!ctx) {
+        throw new Error("useNotif harus digunakan di dalam struktur komponen NotifProvider");
+    }
+    return ctx;
 }

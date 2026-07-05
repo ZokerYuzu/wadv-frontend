@@ -1,66 +1,118 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+export function LoginPage() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [apiError, setApiError] = useState(null);
 
-import { LoginPage } from "./pages/LoginPage";
-import { RegisterPage } from "./pages/RegisterPage";
-import { TasksPage } from "./pages/TasksPage";
-import { ProfilePage } from "./pages/ProfilePage";
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm();
 
-export default function App() {
+  const onSubmit = async ({ email, password }) => {
+    setApiError(null);
+
+    try {
+      await login(email, password);
+      navigate("/tasks");
+    } catch (err) {
+      const msg =
+        err.response?.data?.error?.message ||
+        "Login gagal";
+
+      setApiError(msg);
+    }
+  };
+
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/login"
-            element={<LoginPage />}
-          />
+    <div className="auth-container">
+      <div className="auth-card">
+        <h1>Masuk ke Akun</h1>
 
-          <Route
-            path="/register"
-            element={<RegisterPage />}
-          />
+        <p>
+          Web Advanced Development — Task Manager
+        </p>
 
-          <Route element={<ProtectedRoute />}>
-            <Route
-              path="/"
-              element={
-                <Navigate
-                  to="/tasks"
-                  replace
-                />
-              }
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="form-group">
+            <label>Email</label>
+
+            <input
+              type="email"
+              placeholder="email@contoh.com"
+              {...register("email", {
+                required: "Email wajib diisi",
+                pattern: {
+                  value:
+                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message:
+                    "Format email tidak valid",
+                },
+              })}
             />
 
-            <Route
-              path="/tasks"
-              element={<TasksPage />}
+            {errors.email && (
+              <span className="error">
+                {errors.email.message}
+              </span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label>Password</label>
+
+            <input
+              type="password"
+              placeholder="Minimal 8 karakter"
+              {...register("password", {
+                required:
+                  "Password wajib diisi",
+                minLength: {
+                  value: 8,
+                  message:
+                    "Minimal 8 karakter",
+                },
+              })}
             />
 
-            <Route
-              path="/profile"
-              element={<ProfilePage />}
-            />
-          </Route>
+            {errors.password && (
+              <span className="error">
+                {errors.password.message}
+              </span>
+            )}
+          </div>
 
-          <Route
-            path="*"
-            element={
-              <Navigate
-                to="/tasks"
-                replace
-              />
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+          {apiError && (
+            <div className="alert-error">
+              {apiError}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting
+              ? "Masuk..."
+              : "Masuk"}
+          </button>
+        </form>
+
+        <p className="auth-link">
+          Belum punya akun?{" "}
+          <Link to="/register">
+            Daftar sekarang
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }
+
+export default LoginPage;

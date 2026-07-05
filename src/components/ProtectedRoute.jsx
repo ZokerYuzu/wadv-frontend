@@ -6,13 +6,7 @@ export function ProtectedRoute() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: "4rem",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "4rem" }}>
         <p>Memuat...</p>
       </div>
     );

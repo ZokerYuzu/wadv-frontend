@@ -1,106 +1,54 @@
-export function TaskCard({
-  task,
-  onEdit,
-  onDelete,
-}) {
+export function TaskCard({ task, onEdit, onDelete }) {
   const statusConfig = {
-    TODO: {
-      label: "Belum Dimulai",
-      color: "#6b7280",
-    },
-    IN_PROGRESS: {
-      label: "Sedang Dikerjakan",
-      color: "#2563eb",
-    },
-    DONE: {
-      label: "Selesai",
-      color: "#16a34a",
-    },
+    TODO: { label: "Belum Dimulai", color: "#6b7280" },
+    IN_PROGRESS: { label: "Sedang Dikerjakan", color: "#2563eb" },
+    DONE: { label: "Selesai", color: "#16a34a" },
   };
 
   const priorityConfig = {
-    LOW: {
-      label: "Rendah",
-      color: "#6b7280",
-    },
-    MEDIUM: {
-      label: "Sedang",
-      color: "#d97706",
-    },
-    HIGH: {
-      label: "Tinggi",
-      color: "#dc2626",
-    },
+    LOW: { label: "Rendah", color: "#6b7280" },
+    MEDIUM: { label: "Sedang", color: "#d97706" },
+    HIGH: { label: "Tinggi", color: "#dc2626" },
   };
 
-  const s =
-    statusConfig[task.status] ||
-    statusConfig.TODO;
-
-  const p =
-    priorityConfig[task.priority] ||
-    priorityConfig.MEDIUM;
+  const s = statusConfig[task.status] || statusConfig.TODO;
+  const p = priorityConfig[task.priority] || priorityConfig.MEDIUM;
 
   return (
     <div className="task-card">
       <div className="task-card-header">
-        <h3 className="task-title">
-          {task.title}
-        </h3>
-
+        <h3 className="task-title">{task.title}</h3>
         <div className="task-actions">
-          <button
-            onClick={() => onEdit(task)}
-            className="btn-icon"
-          >
+          <button onClick={() => onEdit(task)} className="btn-icon" title="Ubah">
             ✏
           </button>
-
-          <button
-            onClick={() =>
-              onDelete(task.id)
-            }
-            className="btn-icon"
-          >
+          <button onClick={() => onDelete(task.id)} className="btn-icon" title="Hapus">
             🗑
           </button>
         </div>
       </div>
 
+      {/* Hanya tampilkan deskripsi jika datanya tersedia */}
       {task.description && (
-        <p className="task-description">
-          {task.description}
-        </p>
+        <p className="task-description">{task.description}</p>
       )}
 
       <div className="task-card-footer">
-        <span
-          className="badge"
-          style={{
-            backgroundColor: s.color,
-          }}
-        >
+        <span className="badge" style={{ backgroundColor: s.color }}>
           {s.label}
         </span>
-
-        <span
-          className="badge-outline"
-          style={{
-            borderColor: p.color,
-            color: p.color,
-          }}
-        >
+        
+        <span className="badge-outline" style={{ borderColor: p.color, color: p.color }}>
           {p.label}
         </span>
 
         {task.dueDate && (
           <span className="due-date">
-            📅{" "}
-            {new Date(
-              task.dueDate
-            ).toLocaleDateString(
-              "id-ID"
-            )}
+            📅 {new Date(task.dueDate).toLocaleDateString("id-ID", {
+              year: "numeric",
+              month: "short",
+              day: "numeric"
+            })}
           </span>
         )}
       </div>

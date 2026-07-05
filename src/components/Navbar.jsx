@@ -4,9 +4,7 @@ import { useSocket } from "../contexts/SocketContext";
 
 export function Navbar() {
   const { user, logout } = useAuth();
-  const { isConnected, onlineCount } =
-    useSocket();
-
+  const { isConnected, onlineCount } = useSocket();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -17,37 +15,31 @@ export function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/tasks">
-          WAD Task Manager
-        </Link>
+        <Link to="/tasks">WAD Task Manager</Link>
       </div>
-
       <div className="navbar-menu">
-        <div className="rt-indicator">
+        <div className="rt-indicator" style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginRight: "1rem" }}>
           <span
             className="rt-dot"
-            style={{
-              background: isConnected
-                ? "#4ade80"
-                : "#f87171",
+            style={{ 
+              width: "10px",
+              height: "10px",
+              borderRadius: "50%",
+              display: "inline-block",
+              background: isConnected ? "#4ade80" : "#f87171",
+              transition: "background 0.3s ease"
             }}
+            title={isConnected ? "Real-time aktif" : "Koneksi terputus"}
           />
-
-          <span className="rt-label">
-            {isConnected
-              ? `${onlineCount} online`
-              : "Offline"}
+          <span className="rt-label" style={{ fontSize: "0.85rem", color: "#4b5563", fontWeight: 500 }}>
+            {isConnected ? `${onlineCount} online` : "Offline"}
           </span>
         </div>
-
+        
         <Link to="/tasks">Tasks</Link>
         <Link to="/profile">Profil</Link>
-
-        <span>
-          Halo, {user?.name}
-        </span>
-
-        <button onClick={handleLogout}>
+        <span className="navbar-user">Halo, {user?.name}</span>
+        <button onClick={handleLogout} className="btn-logout">
           Keluar
         </button>
       </div>
