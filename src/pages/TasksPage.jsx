@@ -5,6 +5,7 @@ import { TaskForm } from "../components/TaskForm";
 import { taskService } from "../services/task.service";
 import { useRealTimeTasks } from "../hooks/useRealTimeTasks";
 import { Plus, LayoutGrid, ListFilter, AlertCircle, Loader2 } from "lucide-react";
+import { useNotif } from "../contexts/NotifContext";
 
 export function TasksPage() {
   const [tasks, setTasks] = useState([]);
@@ -15,6 +16,8 @@ export function TasksPage() {
   const [editTarget, setEditTarget] = useState(null);
 
   const [filter, setFilter] = useState("ALL");
+
+  const { addToast } = useNotif();
 
   useRealTimeTasks(setTasks);
 
@@ -37,13 +40,21 @@ export function TasksPage() {
   }, [fetchTasks]);
 
   const handleCreate = async (formData) => {
-    const newTask = await taskService.create(formData);
-    setTasks((prev) => {
-      const exists = prev.some((t) => t.id === newTask.id);
-      if (exists) return prev;
-      return [newTask, ...prev];
-    });
-    setShowForm(false);
+    try {
+      const newTask = await taskService.create(formData);
+      setTasks((prev) => {
+        const exists = prev.some((t) => t.id === newTask.id);
+        if (exists) return prev;
+        return [newTask, ...prev];
+      });
+      setShowForm(false);
+    } catch (err) {
+      addToast({
+        type: "ERROR",
+        title: "Gagal Membuat Task",
+        message: err.response?.data?.error?.message || "Terjadi kesalahan",
+      });
+    }
   };
 
   const handleEditClick = (task) => {
@@ -52,16 +63,32 @@ export function TasksPage() {
   };
 
   const handleUpdate = async (formData) => {
-    const updated = await taskService.update(editTarget.id, formData);
-    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
-    setShowForm(false);
-    setEditTarget(null);
+    try {
+      const updated = await taskService.update(editTarget.id, formData);
+      setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      setShowForm(false);
+      setEditTarget(null);
+    } catch (err) {
+      addToast({
+        type: "ERROR",
+        title: "Gagal Memperbarui Task",
+        message: err.response?.data?.error?.message || "Terjadi kesalahan",
+      });
+    }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Yakin ingin menghapus task ini?")) return;
-    await taskService.remove(id);
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+    try {
+      await taskService.remove(id);
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+    } catch (err) {
+      addToast({
+        type: "ERROR",
+        title: "Gagal Menghapus Task",
+        message: err.response?.data?.error?.message || "Terjadi kesalahan",
+      });
+    }
   };
 
   const handleCloseForm = () => {
