@@ -5,8 +5,14 @@ import { X } from "lucide-react";
 export function TaskForm({ onSubmit, onCancel, initialData = null }) {
   const isEdit = !!initialData;
 
+  // Pastikan dueDate dari backend (ISO string) dipotong menjadi YYYY-MM-DD untuk <input type="date">
+  const processedInitialData = initialData ? {
+    ...initialData,
+    dueDate: initialData.dueDate ? initialData.dueDate.split('T')[0] : ""
+  } : null;
+
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
-    defaultValues: initialData || {
+    defaultValues: processedInitialData || {
       title: "",
       description: "",
       status: "TODO",
@@ -16,7 +22,7 @@ export function TaskForm({ onSubmit, onCancel, initialData = null }) {
   });
 
   useEffect(() => {
-    if (initialData) reset(initialData);
+    if (processedInitialData) reset(processedInitialData);
   }, [initialData, reset]);
 
   return (
