@@ -4,7 +4,7 @@ import { TaskCard } from "../components/TaskCard";
 import { TaskForm } from "../components/TaskForm";
 import { taskService } from "../services/task.service";
 import { useRealTimeTasks } from "../hooks/useRealTimeTasks";
-import { Plus, LayoutGrid, ListFilter, AlertCircle, Loader2 } from "lucide-react";
+import { Plus, LayoutGrid, AlertCircle, Loader2 } from "lucide-react";
 import { useNotif } from "../contexts/NotifContext";
 
 export function TasksPage() {
@@ -16,6 +16,7 @@ export function TasksPage() {
   const [editTarget, setEditTarget] = useState(null);
 
   const [filter, setFilter] = useState("ALL");
+  const [selectedTags, setSelectedTags] = useState([]);
 
   const { addToast } = useNotif();
 
@@ -96,6 +97,14 @@ export function TasksPage() {
     setEditTarget(null);
   };
 
+  const allTags = [...new Set(tasks.flatMap((t) => t.tags || []))].sort();
+
+  const toggleTag = (tag) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
   // Gunakan local filtering tambahan untuk memastikan
   const displayTasks = tasks.filter((t) => {
     if (filter === "ALL") return true;
@@ -103,6 +112,10 @@ export function TasksPage() {
     return filter === "IN_PROGRESS"
       ? s === "IN_PROGRESS"
       : s === filter;
+  }).filter((t) => {
+    if (selectedTags.length === 0) return true;
+    const taskTags = t.tags || [];
+    return selectedTags.some((tag) => taskTags.includes(tag));
   });
 
   return (
@@ -140,6 +153,33 @@ export function TasksPage() {
               </button>
             ))}
           </div>
+
+          {allTags.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider shrink-0">Tag</span>
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-all ${
+                    selectedTags.includes(tag)
+                      ? "bg-indigo-100 text-indigo-700 border-indigo-300 shadow-sm"
+                      : "bg-white text-slate-500 border-slate-200 hover:border-indigo-200 hover:text-indigo-600"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+              {selectedTags.length > 0 && (
+                <button
+                  onClick={() => setSelectedTags([])}
+                  className="text-xs font-medium px-2 py-1.5 text-rose-500 hover:text-rose-700 transition-colors"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {error && (
